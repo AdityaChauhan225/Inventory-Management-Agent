@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+scaledown
+
+sqlalchemy
+pandas
+
