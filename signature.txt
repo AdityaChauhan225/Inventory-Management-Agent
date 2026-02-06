@@ -1,0 +1,3 @@
+Signature: (self, enable_optimization_styles: bool = True)
+Doc: Main interface for the ScaleDown package.
+Init Doc: Initialize ScaleDown with default managers.

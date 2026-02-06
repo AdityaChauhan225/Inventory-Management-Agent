@@ -1,0 +1,10 @@
+Signature: (self, question: str, optimizers: List[str]) -> Dict[str, Any]
+Doc: Optimize question using the modular optimization pipeline.
+
+Args:
+    question: The question or prompt to optimize
+    optimizers: List of optimizer names to apply
+
+Returns:
+    Dictionary with optimization results
+
