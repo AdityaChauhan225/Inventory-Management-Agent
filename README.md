@@ -91,6 +91,3 @@ npm run dev
 * **ScaleDown Error:** Check if `SCALEDOWN_KEY` is correct in `ai_logic.py`. If no key is provided, the system defaults to a fallback simulation for demo purposes.
 
 ---
-
-Would you like me to help you create a `requirements.txt` or a `package.json` file for these directories?
-```
