@@ -19,7 +19,7 @@ class InventoryAgent:
         # Configure ollama client
         os.environ['OLLAMA_HOST'] = self.base_url
         
-    def analyze_inventory(self, data: str, user_question: Optional[str] = None) -> str:
+    def analyze_inventory(self, data: str, user_question: Optional[str] = None):
         """
         Analyze inventory data and provide insights
         
@@ -57,23 +57,27 @@ Format your response with clear headings and bullet points. Be concise and data-
         user_prompt += "Please provide your detailed analysis and recommendations:"
         
         try:
-            response = ollama.chat(
+            # Return a generator for streaming
+            stream = ollama.chat(
                 model=self.model,
                 messages=[
                     {'role': 'system', 'content': system_prompt},
                     {'role': 'user', 'content': user_prompt}
-                ]
+                ],
+                stream=True
             )
             
-            return response['message']['content']
+            for chunk in stream:
+                yield chunk['message']['content']
             
         except Exception as e:
             error_msg = str(e)
             if "connection refused" in error_msg.lower():
-                return "❌ Error: Could not connect to Ollama. As check if 'ollama serve' is running."
+                yield "❌ Error: Could not connect to Ollama. Please check if 'ollama serve' is running."
             elif "not found" in error_msg.lower():
-                return f"❌ Error: Model '{self.model}' not found. Please run 'ollama pull {self.model}'."
-            return f"❌ AI Analysis Error: {error_msg}"
+                yield f"❌ Error: Model '{self.model}' not found. Please run 'ollama pull {self.model}'."
+            else:
+                yield f"❌ AI Analysis Error: {error_msg}"
     
     def generate_recommendations(self, analysis: str) -> Dict[str, list]:
         """

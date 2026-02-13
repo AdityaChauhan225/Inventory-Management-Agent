@@ -26,83 +26,9 @@ st.set_page_config(
 )
 
 
-# Custom CSS for minimalistic design
 # Custom CSS for modern design
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .main-header {
-        font-size: 2.8rem;
-        font-weight: 800;
-        background: linear-gradient(90deg, #1E88E5, #005CB2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
-    }
-    
-    .sub-header {
-        font-size: 1.1rem;
-        color: #546E7A;
-        margin-bottom: 2.5rem;
-        font-weight: 400;
-    }
-    
-    .metric-card {
-        background-color: #FFFFFF;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        border-left: 5px solid #1E88E5;
-        margin-bottom: 1rem;
-        transition: transform 0.2s;
-    }
-    
-    .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    }
-    
-    .stButton>button {
-        width: 100%;
-        background-color: #1E88E5;
-        color: white;
-        border-radius: 8px;
-        padding: 0.6rem 1.2rem;
-        border: none;
-        font-weight: 600;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s;
-    }
-    
-    .stButton>button:hover {
-        background-color: #1565C0;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-    
-    .stMetric {
-        background-color: #F8F9FA;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    }
-    
-    h1, h2, h3 {
-        color: #263238;
-        font-weight: 700;
-    }
-    
-    .stDataFrame {
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-</style>
-""", unsafe_allow_html=True)
+from styles import CUSTOM_CSS
+st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 
 def main():
@@ -246,21 +172,39 @@ def main():
                     compression_result = scaledown.compress_prompt(data_text)
                     st.session_state.compression_stats = scaledown.get_stats(compression_result)
                 
-                with st.spinner("Analyzing with Ollama AI..."):
-                    # Get AI analysis
-                    analysis = agent.analyze_inventory(
-                        compression_result['compressed_text'],
-                        user_question if user_question else None
-                    )
-                    st.session_state.analysis_results = analysis
+                with st.spinner("Analyzing with Ollama AI (Streaming)..."):
+                    with st.chat_message("assistant"):
+                        analysis_container = st.empty()
+                        full_response = ""
+                        
+                        try:
+                            # Get generator
+                            stream = agent.analyze_inventory(
+                                compression_result['compressed_text'],
+                                user_question if user_question else None
+                            )
+                            
+                            # Consume stream
+                            for chunk in stream:
+                                full_response += chunk
+                                analysis_container.markdown(full_response + "▌")
+                            
+                            # Final update without cursor
+                            analysis_container.markdown(full_response)
+                            st.session_state.analysis_results = full_response
+                        
+                        except Exception as e:
+                            st.error(f"Analysis failed: {str(e)}")
+                            st.session_state.analysis_results = None
             
-            # Display results if available
-            if st.session_state.analysis_results:
+            # Display results if available (and not just shown above)
+            if st.session_state.analysis_results and not (analyze_button or analyze_sidebar):
                 if st.session_state.compression_stats:
                     st.info(st.session_state.compression_stats)
                 
                 st.markdown("### 📊 Analysis Results")
-                st.markdown(st.session_state.analysis_results)
+                with st.chat_message("assistant"):
+                    st.markdown(st.session_state.analysis_results)
                 
                 # Generate report
                 st.header("5️⃣ Download Report")

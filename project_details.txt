@@ -1,0 +1,48 @@
+# IMA-V3: Inventory Management & AI Forecasting System
+# Project Overview & Documentation
+
+## 1. System Overview
+This project is an intelligent inventory management system that leverages:
+- **Streamlit**: For the interactive web frontend.
+- **ScaleDown API**: For context compression (token optimization).
+- **Ollama (Local LLM)**: For private, offline AI analysis of inventory data.
+
+## 2. File Structure & Logic Separation
+The codebase is structured to separate concerns as requested:
+
+### Frontend Logic
+- **`app.py`**: The main entry point. Handles the UI layout, user interactions, and state management.
+- **`src/styles.py`**: Contains all custom CSS and styling logic to keep the main app file clean.
+
+### Core Logic Modules (in `src/`)
+- **`scaledown_client.py`**: 
+  - Handles communication with the ScaleDown API.
+  - Compresses large inventory datasets into optimized prompts.
+  - Includes fallback logic if the API is unavailable.
+
+- **`ollama_agent.py`**:
+  - Manages the connection to the local Ollama instance.
+  - Generates inventory analysis and recommendations using the `glm-5:cloud` model (or others).
+  - Handles prompts and parses AI responses.
+
+- **`data_processor.py`**:
+  - Handles CSV file loading and parsing.
+  - Calculus inventory metrics (e.g., Run Rate, Days Left).
+  - Prepares data for the AI.
+
+- **`forecaster.py`**:
+  - Generates markdown reports from the analysis.
+  - Formats data for download.
+
+## 3. Configuration
+The system uses a `.env` file for configuration:
+- `OLLAMA_API_BASE`: URL for the local Ollama server (default: http://localhost:11434).
+- `OLLAMA_MODEL`: Model name to use (default: glm-5:cloud).
+- `SCALEDOWN_API_KEY`: API key for ScaleDown (optional).
+
+## 4. How to Run
+1. Ensure Ollama is running (`ollama serve`).
+2. Run the application:
+   ```bash
+   streamlit run app.py
+   ```

@@ -114,26 +114,64 @@ class DataProcessor:
         else:
             return 'OK'
     
-    def format_for_ai(self, df: pd.DataFrame, max_rows: int = 1000) -> str:
+    def format_for_ai(self, df: pd.DataFrame, max_chars: int = 15000) -> str:
         """
-        Convert DataFrame to compact text format for AI processing
+        Convert DataFrame to compact text format for AI processing.
+        Prioritizes Critical/Warning items and includes a summary.
         """
-        # Limit rows to avoid token overflow
-        df_sample = df.head(max_rows).copy()
+        # 1. Create a high-level summary
+        total_items = len(df)
+        urgency_counts = df['urgency'].value_counts().to_dict() if 'urgency' in df.columns else {}
         
-        # Clean data: replace NaN with empty string
-        df_sample = df_sample.fillna('')
+        summary = f"""
+INVENTORY SUMMARY:
+- Total Items: {total_items}
+- Critical Items (Restock Now): {urgency_counts.get('CRITICAL', 0)}
+- Warning Items (Monitor): {urgency_counts.get('WARNING', 0)}
+- OK Items: {urgency_counts.get('OK', 0)}
+"""
+
+        # 2. Filter and Prioritize Data
+        # We want to send ALL Critical and Warning items, but only a sample of others if space permits.
         
-        # Convert to CSV string using pandas (more robust)
-        # index=False to exclude row numbers, quoting=None for minimal quotes unless needed
-        output = "INVENTORY DATA (CSV Format):\n\n"
-        output += df_sample.to_csv(index=False)
+        if 'urgency' in df.columns:
+            # Split dataframe
+            critical_df = df[df['urgency'] == 'CRITICAL'].copy()
+            warning_df = df[df['urgency'] == 'WARNING'].copy()
+            other_df = df[~df['urgency'].isin(['CRITICAL', 'WARNING'])].copy()
+            
+            # Combine back with priority
+            # Critical -> Warning -> Others
+            prioritized_df = pd.concat([critical_df, warning_df, other_df])
+        else:
+            prioritized_df = df.copy()
+            
+        # 3. Trim Columns
+        # Keep only essential columns to save tokens
+        essential_cols = []
+        for col_type in ['sku', 'product_name', 'stock', 'sales', 'days_left', 'urgency']:
+            if col_type in self.detected_columns:
+                essential_cols.append(self.detected_columns[col_type])
+            elif col_type in prioritized_df.columns: # fallback if column name is standard
+                 essential_cols.append(col_type)
+                 
+        # If we found essential columns, use only those. Otherwise use all.
+        if len(essential_cols) >= 3:
+            export_df = prioritized_df[essential_cols]
+        else:
+            export_df = prioritized_df
+
+        # 4. Convert to CSV string until limit is reached
+        csv_string = export_df.to_csv(index=False)
         
-        # Limit total output size to prevent API issues - increased to 50k chars
-        if len(output) > 50000:
-            output = output[:50000] + "\n[Data truncated for API compatibility]"
+        # 5. Construct Final Prompt
+        final_output = summary + "\nDETAILED DATA (Sorted by Urgency):\n" + csv_string
         
-        return output
+        # 6. Strict Length Limiting
+        if len(final_output) > max_chars:
+            final_output = final_output[:max_chars] + "\n... [Data Truncated for Speed] ..."
+            
+        return final_output
     
     def get_summary_stats(self, df: pd.DataFrame) -> Dict:
         """Generate summary statistics"""
