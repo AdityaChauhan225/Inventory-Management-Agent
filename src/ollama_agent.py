@@ -40,7 +40,18 @@ class InventoryAgent:
         focus_str = "; ".join(context_focus) if context_focus else "Analyze inventory levels"
 
         # Build dynamic prompt
-        system_prompt = f"""You are an expert inventory management analyst. 
+        if user_question:
+            system_prompt = f"""You are an expert inventory management analyst. 
+{focus_str}.
+
+Answer the user's question based on the provided inventory data. Be specific, concise, and citing numbers from the data where possible."""
+
+            user_prompt = f"INVENTORY DATA:\n{data}\n\n"
+            user_prompt += f"USER QUESTION: {user_question}\n\n"
+            user_prompt += "Answer the user question directly:"
+            
+        else:
+            system_prompt = f"""You are an expert inventory management analyst. 
 {focus_str}.
 
 Based on the provided data, generate a structured analysis including:
@@ -51,10 +62,8 @@ Based on the provided data, generate a structured analysis including:
 
 Format your response with clear headings and bullet points. Be concise and data-driven."""
 
-        user_prompt = f"INVENTORY DATA:\n{data}\n\n"
-        if user_question:
-            user_prompt += f"USER QUESTION: {user_question}\n\n"
-        user_prompt += "Please provide your detailed analysis and recommendations:"
+            user_prompt = f"INVENTORY DATA:\n{data}\n\n"
+            user_prompt += "Please provide your detailed analysis and recommendations:"
         
         try:
             # Return a generator for streaming
