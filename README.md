@@ -17,13 +17,13 @@ A minimalistic inventory management system powered by AI for demand forecasting 
 
 - Python 3.8+
 - Ollama installed and running
-- (Optional) ScaleDown API key
+- ScaleDown API key
 
 ### Installation
 
 1. **Clone or navigate to the project directory**
    ```bash
-   cd "e:\code\GENAI ScaleDown\IMA-V3"
+   git clone "https://github.com/AdityaChauhan225/Inventory-Management-Agent"
    ```
 
 2. **Install dependencies**
