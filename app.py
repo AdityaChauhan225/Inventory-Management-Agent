@@ -41,8 +41,8 @@ def main():
         st.session_state.processed_data_hash = None
 
     # Header
-    st.markdown('<div class="main-header">Inventory Management Agent</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Inventory Management & AI Forecasting System</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">IMA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Inventory Management Agent System</div>', unsafe_allow_html=True)
     
     # Sidebar
     with st.sidebar:
