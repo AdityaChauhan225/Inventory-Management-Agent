@@ -1,4 +1,0 @@
-Status: 200
-
---- RAW RESPONSE ---
-{"results":{"success":true,"compressed_prompt":"Item 1: Widget A, Stock: 100 Item 2: Widget B, Stock: 5 Item 3: Widget C, Stock: 200","original_prompt":"Which items need restocking?","original_prompt_tokens":41,"compressed_prompt_tokens":33,"compression_ratio":0.8048780487804879},"model_used":"gpt-4-turbo","total_original_tokens":41,"total_compressed_tokens":33,"num_pairs_processed":1,"num_successful":1,"num_failed":0,"successful":true,"partially_successful":false,"latency_ms":31,"request_metadata":{"compression_time_ms":31,"compression_rate":"auto","average_compression_ratio":0.8048780487804879}}

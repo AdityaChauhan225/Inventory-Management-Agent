@@ -1,4 +1,0 @@
-Status: 200
-
---- RAW RESPONSE ---
-{"results":{"success":true,"compressed_prompt":"Inventory data context","original_prompt":"Item 1: Widget A, Stock: 100\nItem 2: Widget B, Stock: 5","original_prompt_tokens":26,"compressed_prompt_tokens":3,"compression_ratio":0.11538461538461539},"model_used":"gpt-4-turbo","total_original_tokens":26,"total_compressed_tokens":3,"num_pairs_processed":1,"num_successful":1,"num_failed":0,"successful":true,"partially_successful":false,"latency_ms":26,"request_metadata":{"compression_time_ms":26,"compression_rate":"auto","average_compression_ratio":0.11538461538461539}}
